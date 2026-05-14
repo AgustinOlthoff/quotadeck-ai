@@ -129,6 +129,9 @@ pub fn run() {
             commands::settings::get_settings,
             commands::settings::update_settings,
             commands::settings::get_activity_log,
+            // Quota commands
+            commands::quota::fetch_account_quota,
+            commands::quota::fetch_all_quotas,
         ])
         .run(tauri::generate_context!())
         .expect("Error while running QuotaDeck AI");

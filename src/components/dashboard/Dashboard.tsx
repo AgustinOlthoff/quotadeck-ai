@@ -1,7 +1,9 @@
 import { motion } from "framer-motion";
 import { Activity, Users, Clock, Zap } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { cn } from "../../utils/cn";
-import { formatQuota, formatCountdown, getQuotaColor } from "../../utils/formatters";
+import { getModelDisplayName, getQuotaColor } from "../../types/quota";
+import { formatCountdown } from "../../utils/formatters";
 import type { ModelQuota } from "../../types/quota";
 import type { Account } from "../../types/account";
 
@@ -37,6 +39,8 @@ interface DashboardProps {
  * It provides a quick overview of the current account's quota usage.
  */
 export function Dashboard({ activeAccount, quotas, totalAccounts, isLoading }: DashboardProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="p-6 space-y-6 overflow-y-auto h-full">
       {/* ── Stats Overview ── */}
@@ -48,19 +52,19 @@ export function Dashboard({ activeAccount, quotas, totalAccounts, isLoading }: D
       >
         <StatCard
           icon={<Zap size={18} />}
-          label="Active Account"
-          value={activeAccount?.label || activeAccount?.email || "None"}
+          label={t("dashboard.activeAccount", "Active Account")}
+          value={activeAccount?.label || activeAccount?.email || t("common.none", "None")}
           accent="primary"
         />
         <StatCard
           icon={<Users size={18} />}
-          label="Total Accounts"
+          label={t("dashboard.totalAccounts", "Total Accounts")}
           value={String(totalAccounts)}
           accent="success"
         />
         <StatCard
           icon={<Activity size={18} />}
-          label="Models Tracked"
+          label={t("dashboard.modelsTracked", "Models Tracked")}
           value={String(quotas.length)}
           accent="warning"
         />
@@ -69,7 +73,7 @@ export function Dashboard({ activeAccount, quotas, totalAccounts, isLoading }: D
       {/* ── Quota Cards ── */}
       <div>
         <h2 className="text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-4">
-          Quota Usage
+          {t("dashboard.quotaUsage", "Quota Usage")}
         </h2>
 
         {!activeAccount ? (
@@ -86,7 +90,7 @@ export function Dashboard({ activeAccount, quotas, totalAccounts, isLoading }: D
             animate="visible"
           >
             {quotas.map((quota) => (
-              <QuotaCard key={quota.model} quota={quota} />
+              <QuotaCard key={quota.name} quota={quota} />
             ))}
           </motion.div>
         )}
@@ -132,10 +136,9 @@ function StatCard({ icon, label, value, accent }: StatCardProps) {
 }
 
 function QuotaCard({ quota }: { quota: ModelQuota }) {
-  const { text, percent } = formatQuota(quota.used, quota.total);
-  const color = getQuotaColor(percent);
-  const remaining = 100 - percent;
-  const countdown = formatCountdown(quota.resetsAt);
+  const displayName = getModelDisplayName(quota.name, quota.displayName);
+  const color = getQuotaColor(quota.percentage);
+  const countdown = formatCountdown(quota.resetTime);
 
   return (
     <motion.div
@@ -151,18 +154,18 @@ function QuotaCard({ quota }: { quota: ModelQuota }) {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-sm font-semibold text-[var(--text-primary)]">
-            {quota.displayName}
+            {displayName}
           </h3>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">{quota.model}</p>
+          <p className="text-xs text-[var(--text-muted)] mt-0.5">{quota.name}</p>
         </div>
         <span
           className={cn(
             "text-2xl font-bold",
-            remaining <= 10 && "animate-pulse-glow"
+            quota.percentage <= 10 && "animate-pulse-glow"
           )}
           style={{ color }}
         >
-          {remaining}%
+          {quota.percentage}%
         </span>
       </div>
 
@@ -172,14 +175,14 @@ function QuotaCard({ quota }: { quota: ModelQuota }) {
           className="h-full rounded-full"
           style={{ backgroundColor: color }}
           initial={{ width: 0 }}
-          animate={{ width: `${percent}%` }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          animate={{ width: `${quota.percentage}%` }}
+          transition={{ duration: 0.8, ease: "easeOut" as const }}
         />
       </div>
 
       {/* Footer */}
       <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
-        <span>Used: {text}</span>
+        <span>{quota.percentage}% remaining</span>
         <div className="flex items-center gap-1">
           <Clock size={12} />
           <span>Resets {countdown}</span>
@@ -190,17 +193,17 @@ function QuotaCard({ quota }: { quota: ModelQuota }) {
 }
 
 function EmptyState() {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
       <div className="w-16 h-16 rounded-2xl bg-[var(--bg-elevated)] flex items-center justify-center mb-4">
         <Users size={28} className="text-[var(--text-muted)]" />
       </div>
       <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
-        No account selected
+        {t("dashboard.noAccountSelected", "No account selected")}
       </h3>
       <p className="text-sm text-[var(--text-muted)] max-w-sm">
-        Add an Antigravity account to start monitoring your quota usage.
-        Go to the Accounts page to get started.
+        {t("dashboard.noAccountDescription", "Add an Antigravity account to start monitoring your quota usage.")}
       </p>
     </div>
   );
@@ -220,11 +223,12 @@ function LoadingSkeleton() {
 }
 
 function NoQuotaData() {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
       <Activity size={28} className="text-[var(--text-muted)] mb-3" />
       <p className="text-sm text-[var(--text-muted)]">
-        No quota data available yet. Click Refresh to fetch the latest data.
+        {t("dashboard.noQuotaData", "No quota data available yet.")}
       </p>
     </div>
   );

@@ -1,7 +1,7 @@
 //! Quota data models.
 //!
 //! Structures representing AI model quota information
-//! fetched from Antigravity's API.
+//! fetched from Antigravity's Cloud Code API.
 
 use serde::{Deserialize, Serialize};
 
@@ -10,40 +10,93 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "camelCase")]
 pub struct ModelQuota {
     /// Model identifier (e.g., "gemini-2.5-pro")
-    pub model: String,
+    pub name: String,
 
     /// Human-readable model name
-    pub display_name: String,
+    #[serde(default)]
+    pub display_name: Option<String>,
 
-    /// Number of requests/tokens used in current period
-    pub used: u64,
-
-    /// Total quota limit for current period
-    pub total: u64,
+    /// Remaining percentage (0-100)
+    pub percentage: i32,
 
     /// ISO 8601 timestamp when this quota resets
-    pub resets_at: Option<String>,
-
-    /// ISO 8601 timestamp when this data was last fetched
-    pub fetched_at: String,
+    pub reset_time: String,
 }
 
-/// Complete quota status for an account.
+/// AI credit information from loadCodeAssist paidTier.availableCredits
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct QuotaStatus {
-    /// Account ID this quota belongs to
-    pub account_id: String,
+pub struct CreditInfo {
+    pub credit_type: String,
+    #[serde(default)]
+    pub credit_amount: Option<String>,
+    #[serde(default)]
+    pub minimum_credit_amount_for_usage: Option<String>,
+}
 
+/// Complete quota data structure for an account.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct QuotaData {
     /// Individual model quotas
     pub models: Vec<ModelQuota>,
 
-    /// ISO 8601 timestamp of the last successful fetch
-    pub last_updated: String,
+    /// Unix timestamp of last update
+    pub last_updated: i64,
 
-    /// Whether the quota fetch was successful
+    /// Whether the account is forbidden (403)
+    #[serde(default)]
+    pub is_forbidden: bool,
+
+    /// Subscription tier (FREE/PRO/ULTRA)
+    #[serde(default)]
+    pub subscription_tier: Option<String>,
+
+    /// AI credit list (paid accounts only)
+    #[serde(default)]
+    pub credits: Vec<CreditInfo>,
+}
+
+impl QuotaData {
+    pub fn new() -> Self {
+        Self {
+            models: Vec::new(),
+            last_updated: chrono::Utc::now().timestamp(),
+            is_forbidden: false,
+            subscription_tier: None,
+            credits: Vec::new(),
+        }
+    }
+
+    pub fn add_model(
+        &mut self,
+        name: String,
+        display_name: Option<String>,
+        percentage: i32,
+        reset_time: String,
+    ) {
+        self.models.push(ModelQuota {
+            name,
+            display_name,
+            percentage,
+            reset_time,
+        });
+    }
+}
+
+impl Default for QuotaData {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+/// Result of a quota fetch operation, sent to the frontend.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct QuotaFetchResult {
+    pub account_id: String,
+    pub email: String,
+    pub quota: QuotaData,
     pub success: bool,
-
-    /// Error message if the fetch failed
     pub error: Option<String>,
 }

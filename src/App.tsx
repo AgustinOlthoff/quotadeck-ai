@@ -2,15 +2,13 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Sidebar, type PageId } from "./components/layout/Sidebar";
 import { Header } from "./components/layout/Header";
-import { Dashboard } from "./components/dashboard/Dashboard";
+import { AccountGrid } from "./components/dashboard/AccountGrid";
 import { AccountList } from "./components/accounts/AccountList";
 import { Settings } from "./components/settings/Settings";
 import { useAccountStore } from "./stores/accountStore";
 import { detectAntigravity } from "./services/tauri/platform";
 import "./styles/globals.css";
 import "./styles/animations.css";
-
-import type { ModelQuota } from "./types/quota";
 
 /**
  * Root application component.
@@ -22,11 +20,9 @@ import type { ModelQuota } from "./types/quota";
 function App() {
   const { t } = useTranslation();
   const [activePage, setActivePage] = useState<PageId>("dashboard");
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [antigravityInstalled, setAntigravityInstalled] = useState<boolean | null>(null);
 
   const { accounts, fetchAccounts } = useAccountStore();
-  const activeAccount = accounts.find((a) => a.isActive) || null;
 
   // Load initial data from the backend on mount
   useEffect(() => {
@@ -36,44 +32,6 @@ function App() {
       .then((info) => setAntigravityInstalled(info.isInstalled))
       .catch(() => setAntigravityInstalled(false));
   }, [fetchAccounts]);
-
-  // Placeholder quota data — will be replaced when quota API is integrated
-  const mockQuotas: ModelQuota[] = activeAccount
-    ? [
-        {
-          model: "gemini-2.5-pro",
-          displayName: "Gemini 2.5 Pro",
-          used: 142,
-          total: 500,
-          resetsAt: new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString(),
-          fetchedAt: new Date().toISOString(),
-        },
-        {
-          model: "gemini-2.5-flash",
-          displayName: "Gemini 2.5 Flash",
-          used: 890,
-          total: 1500,
-          resetsAt: new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString(),
-          fetchedAt: new Date().toISOString(),
-        },
-        {
-          model: "claude-sonnet-4",
-          displayName: "Claude Sonnet 4",
-          used: 45,
-          total: 50,
-          resetsAt: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
-          fetchedAt: new Date().toISOString(),
-        },
-        {
-          model: "gemini-2.5-image",
-          displayName: "Image Generation",
-          used: 12,
-          total: 100,
-          resetsAt: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(),
-          fetchedAt: new Date().toISOString(),
-        },
-      ]
-    : [];
 
   const pageConfig: Record<PageId, { title: string; subtitle?: string }> = {
     dashboard: {
@@ -92,25 +50,10 @@ function App() {
     },
   };
 
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    await fetchAccounts();
-    // Simulated quota refresh — will be replaced with real API calls
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    setIsRefreshing(false);
-  };
-
   const renderPage = () => {
     switch (activePage) {
       case "dashboard":
-        return (
-          <Dashboard
-            activeAccount={activeAccount}
-            quotas={mockQuotas}
-            totalAccounts={accounts.length}
-            isLoading={false}
-          />
-        );
+        return <AccountGrid />;
       case "accounts":
         return <AccountList />;
       case "settings":
@@ -128,8 +71,6 @@ function App() {
         <Header
           title={pageConfig[activePage].title}
           subtitle={pageConfig[activePage].subtitle}
-          onRefresh={activePage === "dashboard" ? handleRefresh : undefined}
-          isRefreshing={isRefreshing}
         />
 
         <main className="flex-1 overflow-hidden">
