@@ -4,10 +4,10 @@
   <p>Track your AI coding assistant usage, manage multiple accounts, and never hit a quota limit by surprise.</p>
 
   <!--
-  [![Release](https://img.shields.io/github/v/release/your-username/quotadeck-ai?style=flat-square)](https://github.com/your-username/quotadeck-ai/releases)
-  [![Downloads](https://img.shields.io/github/downloads/your-username/quotadeck-ai/total?style=flat-square)](https://github.com/your-username/quotadeck-ai/releases)
+  [![Release](https://img.shields.io/github/v/release/auwus21/quotadeck-ai?style=flat-square)](https://github.com/auwus21/quotadeck-ai/releases)
+  [![Downloads](https://img.shields.io/github/downloads/auwus21/quotadeck-ai/total?style=flat-square)](https://github.com/auwus21/quotadeck-ai/releases)
   [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
-  [![CI](https://img.shields.io/github/actions/workflow/status/your-username/quotadeck-ai/ci.yml?style=flat-square)](https://github.com/your-username/quotadeck-ai/actions)
+  [![CI](https://img.shields.io/github/actions/workflow/status/auwus21/quotadeck-ai/ci.yml?style=flat-square)](https://github.com/auwus21/quotadeck-ai/actions)
   -->
 
   [English](README.md) · [Español](README.es.md)
@@ -41,7 +41,7 @@
 
 ### Download
 
-Head to the [Releases](https://github.com/your-username/quotadeck-ai/releases) page and download the installer for your operating system:
+Head to the [Releases](https://github.com/auwus21/quotadeck-ai/releases) page and download the installer for your operating system:
 
 - **Windows**: `.msi` (recommended) or `.exe`
 - **macOS**: `.dmg` (Apple Silicon & Intel)
@@ -57,7 +57,7 @@ Head to the [Releases](https://github.com/your-username/quotadeck-ai/releases) p
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/quotadeck-ai.git
+git clone https://github.com/auwus21/quotadeck-ai.git
 cd quotadeck-ai
 
 # Install dependencies
@@ -114,7 +114,7 @@ We welcome contributions! Please read our [Contributing Guide](CONTRIBUTING.md) 
 ### Quick Start for Contributors
 
 ```bash
-git clone https://github.com/your-username/quotadeck-ai.git
+git clone https://github.com/auwus21/quotadeck-ai.git
 cd quotadeck-ai
 npm install
 npm run tauri dev
